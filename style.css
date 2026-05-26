@@ -1,0 +1,97 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial;
+}
+
+body{
+  background: linear-gradient(135deg,#1e3c72,#2a5298);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container{
+  width: 100%;
+  max-width: 450px;
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+h1{
+  text-align: center;
+  margin-bottom: 20px;
+  color: #1e3c72;
+}
+
+input,
+textarea{
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #ccc;
+  margin-bottom: 15px;
+  resize: none;
+}
+
+button{
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #28a745;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.dashboard{
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.card{
+  background: #f1f1f1;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.pendente{
+  background: #ffe08a;
+}
+
+.sincronizado{
+  background: #9cffb0;
+}
+
+#lista{
+  margin-top: 20px;
+}
+
+.item{
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.status{
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.pendente-texto{
+  color: orange;
+}
+
+.sync-texto{
+  color: green;
+}

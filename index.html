@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="manifest" href="manifest.json">
+
+  <title>Sistema Offline</title>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>Atendimentos Offline</h1>
+
+    <input type="text" id="nome" placeholder="Nome">
+
+    <textarea id="descricao" placeholder="Descrição do atendimento"></textarea>
+
+    <button id="salvar">Salvar Atendimento</button>
+
+    <div class="dashboard">
+
+      <div class="card">
+        <h2 id="total">0</h2>
+        <p>Total</p>
+      </div>
+
+      <div class="card pendente">
+        <h2 id="pendentes">0</h2>
+        <p>Pendentes</p>
+      </div>
+
+      <div class="card sincronizado">
+        <h2 id="sincronizados">0</h2>
+        <p>Sincronizados</p>
+      </div>
+
+    </div>
+
+    <h3>Registros</h3>
+
+    <div id="lista"></div>
+
+  </div>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
