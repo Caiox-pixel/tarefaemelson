@@ -94,7 +94,7 @@ class UIManager {
         nome: nome,
         descricao: descricao,
         data: Validators.getCurrentISODate(),
-        status: Validators.isOnline() ? "sincronizado" : "pendente",
+        status: "pendente",
         hash: "",
       };
 
@@ -108,24 +108,22 @@ class UIManager {
 
       novoAtendimento.hash = duplicateCheck.hash;
 
-      // Salva no banco de dados
+      // Salva no banco de dados local
       await db.saveAtendimento(novoAtendimento);
 
-      // Se offline, adiciona à fila de sincronização
-      if (!Validators.isOnline()) {
-        await db.addToSyncQueue(novoAtendimento, "create");
-      }
+      // Adiciona o registro à fila de sincronização local
+      await db.addToSyncQueue(novoAtendimento, "create");
 
       // Limpa formulário
       this.elements.nome.value = "";
       this.elements.descricao.value = "";
       this.clearError();
 
-      // Atualiza UI
+      // Atualiza UI local imediatamente
       await this.updateDashboard();
       await this.updateList();
 
-      // Tenta sincronizar se online
+      // Tenta sincronizar com Supabase se houver conexão
       if (Validators.isOnline()) {
         await syncManager.syncIfOnline();
       }
