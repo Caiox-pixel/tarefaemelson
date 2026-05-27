@@ -4,9 +4,9 @@
  */
 
 const SUPABASE_URL = "https://qvacbqiiosfiohycpiwz.supabase.co";
-const SUPABASE_ANON_KEY = "sb_secret_iNS4ysICUEvUd5XmLpe4bA_qSGSZhmw";
+const SUPABASE_ANON_KEY = "sb_publishable_nIegbkIKLTaYM3feW2baIg_oGkMSrN0";
 
-const supabaseClient = supabase.createClient(https://qvacbqiiosfiohycpiwz.supabase.co, sb_secret_iNS4ysICUEvUd5XmLpe4bA_qSGSZhmw);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function isSupabaseConfigured() {
   return (
