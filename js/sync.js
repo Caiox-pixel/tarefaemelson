@@ -148,6 +148,10 @@ class SyncManager {
       );
 
       console.error(`Erro ao sincronizar ${queueItem.atendimentoId}:`, error);
+
+      if (typeof ui !== "undefined") {
+        ui.showError(`Erro ao sincronizar atendimento ${queueItem.atendimentoId}: ${error.message}`);
+      }
     }
   }
 
