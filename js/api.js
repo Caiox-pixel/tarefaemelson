@@ -42,10 +42,16 @@ class APIManager {
       dataSync: atendimento.dataSync || new Date().toISOString(),
     };
 
-    const { data, error } = await supabaseClient.from("atendimentos").insert([payload]);
+    const { data, error } = await supabaseClient
+      .from("atendimentos")
+      .upsert([payload], { onConflict: ["id"], returning: "representation" });
 
     if (error) {
       throw error;
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error("Supabase retornou dados vazios após inserir atendimento");
     }
 
     const row = data[0];
