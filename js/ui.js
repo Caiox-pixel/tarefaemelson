@@ -24,6 +24,7 @@ class UIManager {
       sincronizados: document.getElementById("sincronizados"),
       erros: document.getElementById("erros"),
       statusConexao: document.getElementById("statusConexao"),
+      statusSupabase: document.getElementById("statusSupabase"),
       statusSincronizacao: document.getElementById("statusSincronizacao"),
     };
 
@@ -62,17 +63,20 @@ class UIManager {
    * Configura listeners para online/offline
    */
   setupOnlineOfflineListeners() {
-    window.addEventListener("online", () => {
+    window.addEventListener("online", async () => {
       this.updateConnectionStatus(true);
+      await this.refreshSupabaseStatus();
       syncManager.syncIfOnline();
     });
 
     window.addEventListener("offline", () => {
       this.updateConnectionStatus(false);
+      this.updateSupabaseStatus(false);
     });
 
     // Atualiza status inicial
     this.updateConnectionStatus(Validators.isOnline());
+    this.refreshSupabaseStatus();
   }
 
   /**
@@ -88,6 +92,36 @@ class UIManager {
     }
 
     console.log(isOnline ? "Conexão restaurada" : "Conexão perdida");
+  }
+
+  /**
+   * Atualiza status de conexão com Supabase na UI
+   */
+  updateSupabaseStatus(isConnected) {
+    const statusEl = this.elements.statusSupabase;
+    if (statusEl) {
+      statusEl.className = isConnected ? "status-online" : "status-offline";
+      statusEl.innerHTML = isConnected
+        ? '<span class="indicator"></span> Supabase conectado'
+        : '<span class="indicator"></span> Supabase desconectado';
+    }
+
+    console.log(isConnected ? "Supabase conectado" : "Supabase desconectado");
+  }
+
+  async refreshSupabaseStatus() {
+    if (!Validators.isOnline()) {
+      this.updateSupabaseStatus(false);
+      return;
+    }
+
+    try {
+      const connected = await api.checkConnectivity();
+      this.updateSupabaseStatus(connected);
+    } catch (error) {
+      this.updateSupabaseStatus(false);
+      console.warn("Erro ao verificar status do Supabase:", error);
+    }
   }
 
   /**
