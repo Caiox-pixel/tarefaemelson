@@ -273,6 +273,71 @@ class DatabaseManager {
     });
   }
 
+  async replaceAtendimentoId(oldId, newId) {
+    const transaction = this.db.transaction(["atendimentos", "syncQueue"], "readwrite");
+    const atendStore = transaction.objectStore("atendimentos");
+    const syncStore = transaction.objectStore("syncQueue");
+
+    return new Promise((resolve, reject) => {
+      const getRequest = atendStore.get(oldId);
+
+      getRequest.onsuccess = () => {
+        const atendimento = getRequest.result;
+        if (!atendimento) {
+          resolve(false);
+          return;
+        }
+
+        const updatedAtendimento = { ...atendimento, id: newId };
+
+        const deleteRequest = atendStore.delete(oldId);
+        deleteRequest.onsuccess = () => {
+          const addRequest = atendStore.add(updatedAtendimento);
+          addRequest.onsuccess = () => {
+            const cursorRequest = syncStore.openCursor();
+
+            cursorRequest.onsuccess = (event) => {
+              const cursor = event.target.result;
+              if (!cursor) {
+                resolve(true);
+                return;
+              }
+
+              const record = cursor.value;
+              let changed = false;
+
+              if (record.atendimentoId === oldId) {
+                record.atendimentoId = newId;
+                changed = true;
+              }
+
+              if (record.atendimento && record.atendimento.id === oldId) {
+                record.atendimento.id = newId;
+                changed = true;
+              }
+
+              if (changed) {
+                const updateRequest = cursor.update(record);
+                updateRequest.onsuccess = () => cursor.continue();
+                updateRequest.onerror = () => reject(updateRequest.error);
+              } else {
+                cursor.continue();
+              }
+            };
+
+            cursorRequest.onerror = () => reject(cursorRequest.error);
+          };
+
+          addRequest.onerror = () => reject(addRequest.error);
+        };
+
+        deleteRequest.onerror = () => reject(deleteRequest.error);
+      };
+
+      getRequest.onerror = () => reject(getRequest.error);
+    });
+  }
+
   /**
    * Adiciona log de operação
    */

@@ -21,27 +21,35 @@ class APIManager {
 
     if (!supabaseClient) return { id: atendimento.id, status: "offline" };
 
-    const { data, error } = await supabaseClient.from("atendimentos").insert([
-      {
-        id: atendimento.id,
-        nome: atendimento.nome,
-        cpf: atendimento.cpf,
-        idade: atendimento.idade,
-        contato: atendimento.contato,
-        tipoProblema: atendimento.tipoProblema,
-        descricao: atendimento.descricao,
-        data: atendimento.data,
-        status: atendimento.status || "pendente",
-        hash: atendimento.hash,
-        dataSync: atendimento.dataSync || new Date().toISOString(),
-      },
-    ]);
+    const payload = {
+      nome: atendimento.nome,
+      cpf: atendimento.cpf,
+      idade: atendimento.idade,
+      contato: atendimento.contato,
+      tipoProblema: atendimento.tipoProblema,
+      descricao: atendimento.descricao,
+      data: atendimento.data,
+      status: atendimento.status || "pendente",
+      hash: atendimento.hash,
+      dataSync: atendimento.dataSync || new Date().toISOString(),
+    };
+
+    if (Validators.isValidUuid(atendimento.id)) {
+      payload.id = atendimento.id;
+    }
+
+    const { data, error } = await supabaseClient.from("atendimentos").insert([payload]);
 
     if (error) {
       throw error;
     }
 
-    return data[0];
+    const row = data[0];
+    if (row && row.id && row.id !== atendimento.id) {
+      await db.replaceAtendimentoId(atendimento.id, row.id);
+    }
+
+    return row;
   }
 
   async updateAtendimento(id, atendimento) {

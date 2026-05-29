@@ -121,13 +121,14 @@ class SyncManager {
 
       // Se sucesso, atualiza status
       if (resultado && resultado.id) {
-        await db.updateAtendimentoStatus(queueItem.atendimentoId, "sincronizado");
+        const atendimentoId = resultado.id || queueItem.atendimentoId;
+        await db.updateAtendimentoStatus(atendimentoId, "sincronizado");
         await db.removeSyncQueueItem(queueItem.id);
 
         db.addLog(
           "processSyncItem",
           "success",
-          `Item ${queueItem.atendimentoId} sincronizado com sucesso`
+          `Item ${atendimentoId} sincronizado com sucesso`
         );
       }
     } catch (error) {
