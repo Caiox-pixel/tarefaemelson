@@ -21,15 +21,9 @@ class APIManager {
 
     if (!supabaseClient) return { id: atendimento.id, status: "offline" };
 
-    if (!Validators.isValidUuid(atendimento.id)) {
-      const newId = Validators.generateId();
-      await db.replaceAtendimentoId(atendimento.id, newId);
-      atendimento.id = newId;
-      console.log(`[API] ID local inválido substituído por UUID: ${newId}`);
-    }
+    const hasValidId = Validators.isValidUuid(atendimento.id);
 
     const payload = {
-      id: atendimento.id,
       nome: atendimento.nome,
       cpf: atendimento.cpf,
       idade: atendimento.idade,
@@ -42,9 +36,21 @@ class APIManager {
       dataSync: atendimento.dataSync || new Date().toISOString(),
     };
 
-    const { data, error } = await supabaseClient
-      .from("atendimentos")
-      .upsert([payload], { onConflict: ["id"], returning: "representation" });
+    if (hasValidId) {
+      payload.id = atendimento.id;
+    }
+
+    let query = supabaseClient.from("atendimentos");
+    let result;
+
+    if (hasValidId) {
+      query = query.upsert([payload], { onConflict: ["id"] });
+    } else {
+      query = query.insert([payload]);
+    }
+
+    result = await query.select();
+    const { data, error } = result;
 
     if (error) {
       throw error;
@@ -54,8 +60,13 @@ class APIManager {
       const row = data[0];
       if (row && row.id && row.id !== atendimento.id) {
         await db.replaceAtendimentoId(atendimento.id, row.id);
+        atendimento.id = row.id;
       }
       return row;
+    }
+
+    if (!hasValidId) {
+      console.warn("[API] Supabase inseriu atendimento sem retorno de dados, mas sem erro. Mantendo registro local atualizado.");
     }
 
     return atendimento;
@@ -82,7 +93,8 @@ class APIManager {
         hash: atendimento.hash,
         dataSync: new Date().toISOString(),
       })
-      .eq("id", id);
+      .eq("id", id)
+      .select();
 
     if (error) {
       throw error;
