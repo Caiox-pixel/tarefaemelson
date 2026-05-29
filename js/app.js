@@ -78,6 +78,8 @@ async function initializeApp() {
     // 3. Inicializa UI
     console.log("Etapa 3: Inicializando interface...");
     await ui.init();
+    ui.updateConnectionStatus(Validators.isOnline());
+    await ui.refreshSupabaseStatus();
     console.log("✓ Interface inicializada");
 
     // 4. Inicia gerenciador de sincronização
@@ -105,15 +107,17 @@ async function initializeApp() {
 // ============================================================================
 
 // Detecta mudanças de conectividade
-window.addEventListener("online", () => {
+window.addEventListener("online", async () => {
   console.log("Evento: Conexão restaurada");
   ui.updateConnectionStatus(true);
+  await ui.refreshSupabaseStatus();
   syncManager.syncIfOnline();
 });
 
 window.addEventListener("offline", () => {
   console.log("Evento: Conexão perdida");
   ui.updateConnectionStatus(false);
+  ui.updateSupabaseStatus(false);
 });
 
 // Trata erros não capturados

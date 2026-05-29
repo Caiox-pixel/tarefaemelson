@@ -29,7 +29,6 @@ class UIManager {
     };
 
     this.setupEventListeners();
-    this.setupOnlineOfflineListeners();
   }
 
   /**
@@ -62,23 +61,6 @@ class UIManager {
   /**
    * Configura listeners para online/offline
    */
-  setupOnlineOfflineListeners() {
-    window.addEventListener("online", async () => {
-      this.updateConnectionStatus(true);
-      await this.refreshSupabaseStatus();
-      syncManager.syncIfOnline();
-    });
-
-    window.addEventListener("offline", () => {
-      this.updateConnectionStatus(false);
-      this.updateSupabaseStatus(false);
-    });
-
-    // Atualiza status inicial
-    this.updateConnectionStatus(Validators.isOnline());
-    this.refreshSupabaseStatus();
-  }
-
   /**
    * Atualiza status de conexão na UI
    */
