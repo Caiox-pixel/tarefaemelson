@@ -13,6 +13,10 @@ class APIManager {
       {
         id: atendimento.id,
         nome: atendimento.nome,
+        cpf: atendimento.cpf,
+        idade: atendimento.idade,
+        contato: atendimento.contato,
+        tipoProblema: atendimento.tipoProblema,
         descricao: atendimento.descricao,
         data: atendimento.data,
         status: atendimento.status || "pendente",
@@ -33,6 +37,10 @@ class APIManager {
       .from("atendimentos")
       .update({
         nome: atendimento.nome,
+        cpf: atendimento.cpf,
+        idade: atendimento.idade,
+        contato: atendimento.contato,
+        tipoProblema: atendimento.tipoProblema,
         descricao: atendimento.descricao,
         data: atendimento.data,
         status: atendimento.status,
@@ -58,10 +66,34 @@ class APIManager {
     return data;
   }
 
+  async searchAtendimentosByNome(nome) {
+    const query = nome.trim();
+    if (!query) {
+      return [];
+    }
+
+    const { data, error } = await supabaseClient
+      .from("atendimentos")
+      .select("*")
+      .ilike("nome", `%${query}%`)
+      .order("data", { ascending: false })
+      .limit(50);
+
+    if (error) {
+      throw error;
+    }
+
+    return data || [];
+  }
+
   async syncBatch(atendimentos) {
     const registros = atendimentos.map((atendimento) => ({
       id: atendimento.id,
       nome: atendimento.nome,
+      cpf: atendimento.cpf,
+      idade: atendimento.idade,
+      contato: atendimento.contato,
+      tipoProblema: atendimento.tipoProblema,
       descricao: atendimento.descricao,
       data: atendimento.data,
       status: atendimento.status || "pendente",

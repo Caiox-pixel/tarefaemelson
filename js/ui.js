@@ -7,9 +7,17 @@ class UIManager {
   constructor() {
     this.elements = {
       nome: document.getElementById("nome"),
+      cpf: document.getElementById("cpf"),
+      idade: document.getElementById("idade"),
+      contato: document.getElementById("contato"),
+      tipoProblema: document.getElementById("tipoProblema"),
       descricao: document.getElementById("descricao"),
       btnSalvar: document.getElementById("salvar"),
       btnSincronizar: document.getElementById("sincronizar"),
+      themeToggle: document.getElementById("themeToggle"),
+      searchNome: document.getElementById("searchNome"),
+      searchButton: document.getElementById("searchButton"),
+      searchResult: document.getElementById("searchResult"),
       lista: document.getElementById("lista"),
       total: document.getElementById("total"),
       pendentes: document.getElementById("pendentes"),
@@ -31,10 +39,22 @@ class UIManager {
 
     this.elements.btnSincronizar?.addEventListener("click", () => this.handleForceSyncNow());
 
-    // Detecta input no campo de nome
-    this.elements.nome?.addEventListener("input", () => this.clearError());
+    this.elements.searchButton?.addEventListener("click", () => this.handleSearchByNome());
+    this.elements.searchNome?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        this.handleSearchByNome();
+      }
+    });
 
-    // Detecta input no campo de descrição
+    this.elements.themeToggle?.addEventListener("click", () => this.toggleTheme());
+
+    // Detecta input nos campos do formulário
+    this.elements.nome?.addEventListener("input", () => this.clearError());
+    this.elements.cpf?.addEventListener("input", () => this.clearError());
+    this.elements.idade?.addEventListener("input", () => this.clearError());
+    this.elements.contato?.addEventListener("input", () => this.clearError());
+    this.elements.tipoProblema?.addEventListener("change", () => this.clearError());
     this.elements.descricao?.addEventListener("input", () => this.clearError());
   }
 
@@ -75,10 +95,14 @@ class UIManager {
    */
   async handleSaveAtendimento() {
     const nome = this.elements.nome?.value?.trim();
+    const cpf = this.elements.cpf?.value?.trim();
+    const idade = this.elements.idade?.value?.trim();
+    const contato = this.elements.contato?.value?.trim();
+    const tipoProblema = this.elements.tipoProblema?.value?.trim();
     const descricao = this.elements.descricao?.value?.trim();
 
     // Validação
-    const validation = Validators.validateAtendimento({ nome, descricao });
+    const validation = Validators.validateAtendimento({ nome, cpf, idade, contato, tipoProblema, descricao });
 
     if (!validation.valid) {
       this.showError(validation.errors.join("\n"));
@@ -92,6 +116,10 @@ class UIManager {
       const novoAtendimento = {
         id: Validators.generateId(),
         nome: nome,
+        cpf: cpf,
+        idade: idade,
+        contato: contato,
+        tipoProblema: tipoProblema,
         descricao: descricao,
         data: Validators.getCurrentISODate(),
         status: "pendente",
@@ -116,6 +144,12 @@ class UIManager {
 
       // Limpa formulário
       this.elements.nome.value = "";
+      this.elements.cpf.value = "";
+      this.elements.idade.value = "";
+      this.elements.contato.value = "";
+      if (this.elements.tipoProblema) {
+        this.elements.tipoProblema.value = "";
+      }
       this.elements.descricao.value = "";
       this.clearError();
 
@@ -238,6 +272,12 @@ class UIManager {
             <h4>${this.escapeHtml(item.nome)}</h4>
             <span class="status-badge ${item.status}">${item.status}</span>
           </div>
+          <div class="item-meta">
+            <span>CPF: ${this.escapeHtml(item.cpf || "-")}</span>
+            <span>Idade: ${this.escapeHtml(item.idade || "-")}</span>
+            <span>Contato: ${this.escapeHtml(item.contato || "-")}</span>
+          </div>
+          <div class="item-type">Tipo: ${this.escapeHtml(item.tipoProblema || "-")}</div>
           <p class="descricao">${this.escapeHtml(item.descricao)}</p>
           <small class="data">${Validators.formatDate(item.data)}</small>
           ${item.dataSync ? `<small class="data-sync">Sincronizado: ${Validators.formatDate(item.dataSync)}</small>` : ""}
@@ -251,6 +291,68 @@ class UIManager {
         this.elements.lista.innerHTML = `<p class="erro">Erro ao carregar atendimentos: ${error.message}</p>`;
       }
     }
+  }
+
+  async handleSearchByNome() {
+    const nome = this.elements.searchNome?.value?.trim();
+    if (!nome) {
+      this.showError("Digite um nome para buscar.");
+      return;
+    }
+
+    if (!Validators.isOnline()) {
+      this.showError("A busca no Supabase necessita de conexão com internet.");
+      return;
+    }
+
+    try {
+      this.elements.searchButton.disabled = true;
+      this.elements.searchButton.textContent = "Buscando...";
+
+      const resultados = await api.searchAtendimentosByNome(nome);
+      this.renderSearchResults(resultados);
+    } catch (error) {
+      console.error("Erro na busca:", error);
+      this.showError(`Erro ao buscar no Supabase: ${error.message}`);
+    } finally {
+      this.elements.searchButton.disabled = false;
+      if (this.elements.searchButton) {
+        this.elements.searchButton.textContent = "Buscar";
+      }
+    }
+  }
+
+  renderSearchResults(resultados) {
+    if (!this.elements.searchResult) {
+      return;
+    }
+
+    if (!resultados || resultados.length === 0) {
+      this.elements.searchResult.innerHTML = '<p class="vazio">Nenhum resultado encontrado.</p>';
+      return;
+    }
+
+    this.elements.searchResult.innerHTML = resultados
+      .map(
+        (item) => `
+          <div class="item ${item.status}">
+            <div class="item-header">
+              <h4>${this.escapeHtml(item.nome)}</h4>
+              <span class="status-badge ${item.status}">${item.status}</span>
+            </div>
+            <div class="item-meta">
+              <span>CPF: ${this.escapeHtml(item.cpf || "-")}</span>
+              <span>Idade: ${this.escapeHtml(item.idade || "-")}</span>
+              <span>Contato: ${this.escapeHtml(item.contato || "-")}</span>
+            </div>
+            <div class="item-type">Tipo: ${this.escapeHtml(item.tipoProblema || "-")}</div>
+            <p class="descricao">${this.escapeHtml(item.descricao)}</p>
+            <small class="data">${Validators.formatDate(item.data)}</small>
+            ${item.dataSync ? `<small class="data-sync">Sincronizado: ${Validators.formatDate(item.dataSync)}</small>` : ""}
+          </div>
+        `
+      )
+      .join("");
   }
 
   /**
@@ -313,12 +415,40 @@ class UIManager {
   async init() {
     try {
       console.log("Inicializando UIManager");
+      this.initTheme();
       await this.updateDashboard();
       await this.updateList();
     } catch (error) {
       console.error("Erro ao inicializar UI:", error);
       this.showError(`Erro ao inicializar: ${error.message}`);
     }
+  }
+
+  getPreferredTheme() {
+    const savedTheme = localStorage.getItem("appTheme");
+    if (savedTheme === "dark" || savedTheme === "light") {
+      return savedTheme;
+    }
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  applyTheme(theme) {
+    document.body.classList.toggle("dark-theme", theme === "dark");
+    if (this.elements.themeToggle) {
+      this.elements.themeToggle.textContent = theme === "dark" ? "Modo Claro" : "Modo Escuro";
+    }
+    localStorage.setItem("appTheme", theme);
+  }
+
+  toggleTheme() {
+    const currentTheme = document.body.classList.contains("dark-theme") ? "dark" : "light";
+    const nextTheme = currentTheme === "dark" ? "light" : "dark";
+    this.applyTheme(nextTheme);
+  }
+
+  initTheme() {
+    const theme = this.getPreferredTheme();
+    this.applyTheme(theme);
   }
 }
 

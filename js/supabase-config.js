@@ -12,8 +12,8 @@ function isSupabaseConfigured() {
   return (
     SUPABASE_URL &&
     SUPABASE_ANON_KEY &&
-    !SUPABASE_URL.includes("YOUR_SUPABASE_PROJECT") &&
-    !SUPABASE_ANON_KEY.includes("YOUR_SUPABASE_ANON_KEY")
+    !SUPABASE_URL.includes("https://qvacbqiiosfiohycpiwz.supabase.co") &&
+    !SUPABASE_ANON_KEY.includes("sb_publishable_nIegbkIKLTaYM3feW2baIg_oGkMSrN0")
   );
 }
 

@@ -6,6 +6,10 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TABLE IF NOT EXISTS public.atendimentos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   nome text NOT NULL,
+  cpf text NOT NULL,
+  idade integer NOT NULL,
+  contato text NOT NULL,
+  tipoProblema text NOT NULL,
   descricao text NOT NULL,
   data text NOT NULL,
   status text NOT NULL DEFAULT 'pendente',

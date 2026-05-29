@@ -20,6 +20,16 @@
   --transition: all 0.3s ease;
 }
 
+body.dark-theme {
+  --bg-color: #1a1a1a;
+  --card-bg: #2a2a2a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #999999;
+  --border-color: #444444;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -212,13 +222,20 @@ section h2 {
 .form-atendimento {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 16px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  width: 100%;
 }
 
 .form-group label {
@@ -228,7 +245,9 @@ section h2 {
 }
 
 input,
-textarea {
+textarea,
+select {
+  width: 100%;
   padding: 12px;
   border: 2px solid var(--border-color);
   border-radius: 8px;
@@ -236,17 +255,21 @@ textarea {
   font-family: inherit;
   transition: var(--transition);
   resize: none;
+  background: var(--card-bg);
+  color: var(--text-primary);
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
 }
 
 input::placeholder,
-textarea::placeholder {
+textarea::placeholder,
+select::placeholder {
   color: var(--text-secondary);
 }
 
@@ -254,6 +277,26 @@ textarea::placeholder {
   display: flex;
   gap: 10px;
   margin-top: 10px;
+}
+
+.search-section {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.search-box {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-results {
+  display: grid;
+  gap: 14px;
 }
 
 .btn {
@@ -287,14 +330,23 @@ textarea::placeholder {
 }
 
 .btn-secondary {
-  background: var(--card-bg);
+  background: rgba(255, 255, 255, 0.95);
   color: var(--primary-color);
   border: 2px solid var(--primary-color);
+  box-shadow: inset 0 0 0 1px rgba(30, 60, 114, 0.08);
 }
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--primary-color);
   color: white;
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.theme-toggle {
+  white-space: nowrap;
 }
 
 .btn:disabled {
@@ -441,6 +493,32 @@ textarea::placeholder {
   word-break: break-word;
 }
 
+.item-meta,
+.item-type {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.item-meta span,
+.item-type {
+  background: rgba(0, 0, 0, 0.04);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+body.dark-theme .item-meta span,
+body.dark-theme .item-type {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.item-type {
+  font-weight: 600;
+}
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -515,6 +593,10 @@ textarea::placeholder {
     gap: 8px;
   }
 
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
   .app-main {
     padding: 15px;
   }
@@ -572,7 +654,7 @@ textarea::placeholder {
 }
 
 /* Modo Escuro (Opcional) */
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark), body.dark-theme {
   :root {
     --bg-color: #1a1a1a;
     --card-bg: #2a2a2a;

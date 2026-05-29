@@ -22,6 +22,32 @@ class Validators {
       errors.push("Nome não pode ter mais de 100 caracteres");
     }
 
+    if (!atendimento.cpf || atendimento.cpf.trim() === "") {
+      errors.push("CPF é obrigatório");
+    } else {
+      const cpfDigits = atendimento.cpf.replace(/\D/g, "");
+      if (cpfDigits.length !== 11) {
+        errors.push("CPF deve conter 11 dígitos");
+      }
+    }
+
+    if (!atendimento.idade || atendimento.idade.trim() === "") {
+      errors.push("Idade é obrigatória");
+    } else {
+      const idadeNumero = Number(atendimento.idade);
+      if (!Number.isInteger(idadeNumero) || idadeNumero <= 0 || idadeNumero > 120) {
+        errors.push("Idade deve ser um número inteiro válido entre 1 e 120");
+      }
+    }
+
+    if (!atendimento.contato || atendimento.contato.trim() === "") {
+      errors.push("Meio de contato é obrigatório");
+    }
+
+    if (!atendimento.tipoProblema || atendimento.tipoProblema.trim() === "") {
+      errors.push("Tipo de problema é obrigatório");
+    }
+
     if (!atendimento.descricao || atendimento.descricao.trim() === "") {
       errors.push("Descrição é obrigatória");
     }
@@ -44,7 +70,7 @@ class Validators {
    * Gera hash para detectar duplicatas
    */
   static async generateHash(atendimento) {
-    const dataString = `${atendimento.nome}|${atendimento.descricao}|${atendimento.data}`;
+    const dataString = `${atendimento.nome}|${atendimento.cpf || ""}|${atendimento.idade || ""}|${atendimento.contato || ""}|${atendimento.tipoProblema || ""}|${atendimento.descricao || ""}`;
     const encoder = new TextEncoder();
     const data = encoder.encode(dataString);
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
