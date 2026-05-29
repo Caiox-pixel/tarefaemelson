@@ -277,6 +277,12 @@ class DatabaseManager {
    * Adiciona log de operação
    */
   async addLog(operacao, tipo, mensagem) {
+    // Impede erro se o banco não foi inicializado
+    if (!this.db) {
+      console.log(`[DB Log] ${operacao} - ${tipo}: ${mensagem}`);
+      return;
+    }
+
     const transaction = this.db.transaction(["logs"], "readwrite");
     const store = transaction.objectStore("logs");
 

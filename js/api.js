@@ -5,10 +5,18 @@
 
 class APIManager {
   constructor() {
-    assertSupabaseConfigured();
+    this.isSupabaseAvailable = isSupabaseConfigured() && supabaseClient !== null;
+    if (!this.isSupabaseAvailable) {
+      console.warn("[API] Supabase não disponível. App funcionará em modo offline.");
+    }
   }
 
   async createAtendimento(atendimento) {
+    if (!this.isSupabaseAvailable) {
+      console.log("[API] Operação offline - atendimento armazenado localmente");
+      return { id: atendimento.id, status: "offline" };
+    }
+
     const { data, error } = await supabaseClient.from("atendimentos").insert([
       {
         id: atendimento.id,
@@ -33,6 +41,10 @@ class APIManager {
   }
 
   async updateAtendimento(id, atendimento) {
+    if (!this.isSupabaseAvailable) {
+      return { id: id, status: "offline" };
+    }
+
     const { data, error } = await supabaseClient
       .from("atendimentos")
       .update({
@@ -57,6 +69,10 @@ class APIManager {
   }
 
   async getAllAtendimentos() {
+    if (!this.isSupabaseAvailable) {
+      return [];
+    }
+
     const { data, error } = await supabaseClient.from("atendimentos").select("*");
 
     if (error) {
@@ -67,6 +83,10 @@ class APIManager {
   }
 
   async searchAtendimentosByNome(nome) {
+    if (!this.isSupabaseAvailable) {
+      return [];
+    }
+
     const query = nome.trim();
     if (!query) {
       return [];
@@ -87,6 +107,11 @@ class APIManager {
   }
 
   async syncBatch(atendimentos) {
+    if (!this.isSupabaseAvailable) {
+      console.log("[API] Sincronização offline - dados armazenados localmente");
+      return atendimentos;
+    }
+
     const registros = atendimentos.map((atendimento) => ({
       id: atendimento.id,
       nome: atendimento.nome,
@@ -113,6 +138,10 @@ class APIManager {
   }
 
   async checkConnectivity() {
+    if (!this.isSupabaseAvailable) {
+      return false;
+    }
+
     try {
       const { error } = await supabaseClient.from("atendimentos").select("id").limit(1);
       return !error;

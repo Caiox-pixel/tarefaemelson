@@ -26,6 +26,11 @@ async function clearAllCaches() {
 // Limpa caches antigos a cada inicialização
 async function cleanOldCaches() {
   try {
+    if (!("caches" in window)) {
+      console.warn("[App] Cache API não disponível");
+      return;
+    }
+
     const cacheNames = await caches.keys();
     const validCaches = ["atendimentos-cache-v1", "atendimentos-api-cache-v1", "atendimentos-runtime-cache-v1"];
     
@@ -36,9 +41,10 @@ async function cleanOldCaches() {
       }
     }
   } catch (error) {
-    console.error("[App] Erro ao limpar caches antigos:", error);
+    console.warn("[App] Erro ao limpar caches antigos (provavelmente bloqueado por Tracking Prevention):", error);
   }
 }
+
 
 // ============================================================================
 
