@@ -50,16 +50,15 @@ class APIManager {
       throw error;
     }
 
-    if (!data || data.length === 0) {
-      throw new Error("Supabase retornou dados vazios após inserir atendimento");
+    if (data && data.length > 0) {
+      const row = data[0];
+      if (row && row.id && row.id !== atendimento.id) {
+        await db.replaceAtendimentoId(atendimento.id, row.id);
+      }
+      return row;
     }
 
-    const row = data[0];
-    if (row && row.id && row.id !== atendimento.id) {
-      await db.replaceAtendimentoId(atendimento.id, row.id);
-    }
-
-    return row;
+    return atendimento;
   }
 
   async updateAtendimento(id, atendimento) {
@@ -89,7 +88,7 @@ class APIManager {
       throw error;
     }
 
-    return data[0];
+    return (data && data[0]) || atendimento;
   }
 
   async getAllAtendimentos() {
