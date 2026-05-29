@@ -21,7 +21,15 @@ class APIManager {
 
     if (!supabaseClient) return { id: atendimento.id, status: "offline" };
 
+    if (!Validators.isValidUuid(atendimento.id)) {
+      const newId = Validators.generateId();
+      await db.replaceAtendimentoId(atendimento.id, newId);
+      atendimento.id = newId;
+      console.log(`[API] ID local inválido substituído por UUID: ${newId}`);
+    }
+
     const payload = {
+      id: atendimento.id,
       nome: atendimento.nome,
       cpf: atendimento.cpf,
       idade: atendimento.idade,
@@ -33,10 +41,6 @@ class APIManager {
       hash: atendimento.hash,
       dataSync: atendimento.dataSync || new Date().toISOString(),
     };
-
-    if (Validators.isValidUuid(atendimento.id)) {
-      payload.id = atendimento.id;
-    }
 
     const { data, error } = await supabaseClient.from("atendimentos").insert([payload]);
 

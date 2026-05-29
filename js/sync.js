@@ -115,6 +115,10 @@ class SyncManager {
 
       if (queueItem.operacao === "create") {
         resultado = await api.createAtendimento(queueItem.atendimento);
+        if (resultado && resultado.id && resultado.id !== queueItem.atendimentoId) {
+          queueItem.atendimentoId = resultado.id;
+          queueItem.atendimento.id = resultado.id;
+        }
       } else if (queueItem.operacao === "update") {
         resultado = await api.updateAtendimento(queueItem.atendimentoId, queueItem.atendimento);
       }
