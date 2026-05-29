@@ -81,8 +81,12 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignora requisições para chrome extensions
+  // Ignora requisições para chrome extensions e recursos cross-origin
   if (url.protocol === "chrome-extension:") {
+    return;
+  }
+
+  if (url.origin !== self.location.origin) {
     return;
   }
 
